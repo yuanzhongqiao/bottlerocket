@@ -1,616 +1,501 @@
-# Bottlerocket OS
-
-Welcome to Bottlerocket!
-
-Bottlerocket is a free and open-source Linux-based operating system meant for hosting containers.
-
-To learn more about Bottlerocket, visit the [official Bottlerocket website and documentation](https://bottlerocket.dev/).
-Otherwise, if you’re ready to jump right in, read one of our setup guides for running Bottlerocket in [Amazon EKS](QUICKSTART-EKS.md), [Amazon ECS](QUICKSTART-ECS.md), or [VMware](QUICKSTART-VMWARE.md).
-If you're interested in running Bottlerocket on bare metal servers, please refer to the [provisioning guide](PROVISIONING-METAL.md) to get started.
-
-Bottlerocket focuses on security and maintainability, providing a reliable, consistent, and safe platform for container-based workloads.
-This is a reflection of what we've learned building operating systems and services at Amazon.
-You can read more about what drives us in [our charter](CHARTER.md).
-
-The base operating system has just what you need to run containers reliably, and is built with standard open-source components.
-Bottlerocket-specific additions focus on reliable updates and on the API.
-Instead of making configuration changes manually, you can change settings with an API call, and these changes are automatically migrated through updates.
-
-Some notable features include:
-
-* [API access](#api) for configuring your system, with secure out-of-band [access methods](#exploration) when you need them.
-* [Updates](#updates) based on partition flips, for fast and reliable system updates.
-* [Modeled configuration](#settings) that's automatically migrated through updates.
-* [Security](#security) as a top priority.
-
-## Participate in the Community
-
-There are many ways to take part in the Bottlerocket community:
-
-- [Join us on Meetup](https://www.meetup.com/bottlerocket-community/) to hear about the latest Bottlerocket (virtual/in-person) events and community meetings.
-  Community meetings are typically every other week.
-
-  Details can be found under the [Events section on Meetup](https://www.meetup.com/bottlerocket-community/events/), and you will receive email notifications if you become a member of the Meetup group. (It's free to join!)
-
-- [Start or join a discussion](https://github.com/bottlerocket-os/bottlerocket/discussions) if you have questions about Bottlerocket.
-- If you're interested in contributing, thank you!
-  Please see our [contributor's guide](CONTRIBUTING.md).
-
-## Contact us
-
-If you find a security issue, please [contact our security team](https://github.com/bottlerocket-os/bottlerocket/security/policy) rather than opening an issue.
-
-We use GitHub issues to track other bug reports and feature requests.
-You can look at [existing issues](https://github.com/bottlerocket-os/bottlerocket/issues) to see whether your concern is already known.
-
-If not, you can select from a few templates and get some guidance on the type of information that would be most helpful.
-[Contact us with a new issue here.](https://github.com/bottlerocket-os/bottlerocket/issues/new/choose)
-
-We don't have other communication channels set up quite yet, but don't worry about making an issue or a discussion thread!
-You can let us know about things that seem difficult, or even ways you might like to help.
-
-## Variants
-
-To start, we're focusing on the use of Bottlerocket as a host OS in AWS EKS Kubernetes clusters and Amazon ECS clusters.
-We’re excited to get early feedback and to continue working on more use cases!
-
-Bottlerocket is architected such that different cloud environments and container orchestrators can be supported in the future.
-A build of Bottlerocket that supports different features or integration characteristics is known as a 'variant'.
-The artifacts of a build will include the architecture and variant name.
-For example, an `x86_64` build of the `aws-k8s-1.24` variant will produce an image named `bottlerocket-aws-k8s-1.24-x86_64-<version>-<commit>.img`.
-
-The following variants support EKS, as described above:
-
-* `aws-k8s-1.23`
-* `aws-k8s-1.24`
-* `aws-k8s-1.25`
-* `aws-k8s-1.26`
-* `aws-k8s-1.27`
-* `aws-k8s-1.28`
-* `aws-k8s-1.29`
-* `aws-k8s-1.30`
-* `aws-k8s-1.23-nvidia`
-* `aws-k8s-1.24-nvidia`
-* `aws-k8s-1.25-nvidia`
-* `aws-k8s-1.26-nvidia`
-* `aws-k8s-1.27-nvidia`
-* `aws-k8s-1.28-nvidia`
-* `aws-k8s-1.29-nvidia`
-* `aws-k8s-1.30-nvidia`
-
-The following variants support ECS:
-
-* `aws-ecs-1`
-* `aws-ecs-1-nvidia`
-* `aws-ecs-2`
-* `aws-ecs-2-nvidia`
-
-We also have variants that are designed to be Kubernetes worker nodes in VMware:
-
-* `vmware-k8s-1.27`
-* `vmware-k8s-1.28`
-* `vmware-k8s-1.29`
-* `vmware-k8s-1.30`
-
-The following variants are designed to be Kubernetes worker nodes on bare metal:
-
-* `metal-k8s-1.27`
-* `metal-k8s-1.28`
-* `metal-k8s-1.29`
-
-The following variants are no longer supported:
-
-* All Kubernetes variants using Kubernetes 1.22 and earlier
-* Bare metal and VMware variants using Kubernetes 1.26 and earlier
-
-We recommend users replace nodes running these variants with the [latest variant compatible with their cluster](variants/).
-
-## Architectures
-
-Our supported architectures include `x86_64` and `aarch64` (written as `arm64` in some contexts).
-
-## Setup
-
-:walking: :running:
-
-Bottlerocket is best used with a container orchestrator.
-To get started with Kubernetes in Amazon EKS, please see [QUICKSTART-EKS](QUICKSTART-EKS.md).
-To get started with Kubernetes in VMware, please see [QUICKSTART-VMWARE](QUICKSTART-VMWARE.md).
-To get started with Amazon ECS, please see [QUICKSTART-ECS](QUICKSTART-ECS.md).
-These guides describe:
-
-* how to set up a cluster with the orchestrator, so your Bottlerocket instance can run containers
-* how to launch a Bottlerocket instance in EC2 or VMware
-
-To see how to provision Bottlerocket on bare metal, see [PROVISIONING-METAL](PROVISIONING-METAL.md).
-
-To build your own Bottlerocket images, please see [BUILDING](BUILDING.md).
-It describes:
-
-* how to build an image
-* how to register an EC2 AMI from an image
-
-To publish your built Bottlerocket images, please see [PUBLISHING](PUBLISHING.md).
-It describes:
-
-* how to make TUF repos including your image
-* how to copy your AMI across regions
-* how to mark your AMIs public or grant access to specific accounts
-* how to make your AMIs discoverable using [SSM parameters](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html)
-
-## Exploration
-
-To improve security, there's no SSH server in a Bottlerocket image, and not even a shell.
-
-Don't panic!
-
-There are a couple out-of-band access methods you can use to explore Bottlerocket like you would a typical Linux system.
-Either option will give you a shell within Bottlerocket.
-From there, you can [change settings](#settings), manually [update Bottlerocket](#updates), debug problems, and generally explore.
-
-**Note:** These methods require that your instance has permission to access the ECR repository where these containers live; the appropriate policy to add to your instance's IAM role is `AmazonEC2ContainerRegistryReadOnly`.
-
-### Control container
-
-Bottlerocket has a ["control" container](https://github.com/bottlerocket-os/bottlerocket-control-container), enabled by default, that runs outside of the orchestrator in a separate instance of containerd.
-This container runs the [AWS SSM agent](https://github.com/aws/amazon-ssm-agent) that lets you run commands, or start shell sessions, on Bottlerocket instances in EC2.
-(You can easily replace this control container with your own just by changing the URI; see [Settings](#settings).)
-
-In AWS, you need to give your instance the SSM role for this to work; see the [setup guide](QUICKSTART-EKS.md#enabling-ssm).
-Outside of AWS, you can use [AWS Systems Manager for hybrid environments](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-managedinstances.html).
-There's more detail about hybrid environments in the [control container documentation](https://github.com/bottlerocket-os/bottlerocket-control-container/#connecting-to-aws-systems-manager-ssm).
-
-Once the instance is started, you can start a session:
-
-* Go to AWS SSM's [Session Manager](https://console.aws.amazon.com/systems-manager/session-manager/sessions)
-* Select "Start session" and choose your Bottlerocket instance
-* Select "Start session" again to get a shell
-
-If you prefer a command-line tool, you can start a session with a recent [AWS CLI](https://aws.amazon.com/cli/) and the [session-manager-plugin](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html).
-Then you'd be able to start a session using only your instance ID, like this:
-
-```shell
-aws ssm start-session --target INSTANCE_ID
-```
-
-With the [default control container](https://github.com/bottlerocket-os/bottlerocket-control-container), you can make [API calls](#api) to configure and manage your Bottlerocket host.
-To do even more, read the next section about the [admin container](#admin-container).
-You can access the admin container from the control container like this:
-
-```shell
-enter-admin-container
-```
-
-### Admin container
-
-Bottlerocket has an [administrative container](https://github.com/bottlerocket-os/bottlerocket-admin-container), disabled by default, that runs outside of the orchestrator in a separate instance of containerd.
-This container has an SSH server that lets you log in as `ec2-user` using your EC2-registered SSH key.
-Outside of AWS, you can [pass in your own SSH keys](https://github.com/bottlerocket-os/bottlerocket-admin-container#authenticating-with-the-admin-container).
-(You can easily replace this admin container with your own just by changing the URI; see [Settings](#settings).
-
-To enable the container, you can change the setting in user data when starting Bottlerocket, for example EC2 instance user data:
-
-```toml
-[settings.host-containers.admin]
-enabled = true
-```
-
-If Bottlerocket is already running, you can enable the admin container from the default [control container](#control-container) like this:
-
-```shell
-enable-admin-container
-```
-
-Or you can start an interactive session immediately like this:
-
-```shell
-enter-admin-container
-```
-
-If you're using a custom control container, or want to make the API calls directly, you can enable the admin container like this instead:
-
-```shell
-apiclient set host-containers.admin.enabled=true
-```
-
-Once you've enabled the admin container, you can either access it through SSH or execute commands from the control container like this:
-
-```shell
-apiclient exec admin bash
-```
-
-Once you're in the admin container, you can run `sheltie` to get a full root shell in the Bottlerocket host.
-Be careful; while you can inspect and change even more as root, Bottlerocket's filesystem and dm-verity setup will prevent most changes from persisting over a restart - see [Security](#security).
-
-## Updates
-
-Rather than a package manager that updates individual pieces of software, Bottlerocket downloads a full filesystem image and reboots into it.
-It can automatically roll back if boot failures occur, and workload failures can trigger manual rollbacks.
-
-The update process uses images secured by [TUF](https://theupdateframework.github.io/).
-For more details, see the [update system documentation](sources/updater/).
-
-### Update methods
-
-There are several ways of updating your Bottlerocket hosts.
-We provide tools for automatically updating hosts, as well as an API for direct control of updates.
-
-#### Automated updates
-
-For EKS variants of Bottlerocket, we recommend using the [Bottlerocket update operator](https://github.com/bottlerocket-os/bottlerocket-update-operator) for automated updates.
-
-For the ECS variant of Bottlerocket, we recommend using the [Bottlerocket ECS updater](https://github.com/bottlerocket-os/bottlerocket-ecs-updater/) for automated updates.
-
-#### Update API
-
-The [Bottlerocket API](#api) includes methods for checking and starting system updates.
-You can read more about the update APIs in our [update system documentation](sources/updater/README.md#update-api).
-
-apiclient knows how to handle those update APIs for you, and you can run it from the [control](#control-container) or [admin](#admin-container) containers.
-
-To see what updates are available:
-
-```shell
-apiclient update check
-```
-
-If an update is available, it will show up in the `chosen_update` field.
-The `available_updates` field will show the full list of available versions, including older versions, because Bottlerocket supports safely rolling back.
-
-To apply the latest update:
-
-```shell
-apiclient update apply
-```
-
-The next time you reboot, you'll start up in the new version, and system configuration will be automatically [migrated](sources/api/migration/).
-To reboot right away:
-
-```shell
-apiclient reboot
-```
-
-If you're confident about updating, the `apiclient update apply` command has `--check` and `--reboot` flags to combine the above actions, so you can accomplish all of the above steps like this:
-
-```shell
-apiclient update apply --check --reboot
-```
-
-See the [apiclient documentation](sources/api/apiclient/) for more details.
-
-### Update rollback
-
-The system will automatically roll back if it's unable to boot.
-If the update is not functional for a given container workload, you can do a manual rollback:
-
-```shell
-signpost rollback-to-inactive
-reboot
-```
-
-This doesn't require any external communication, so it's quicker than `apiclient`, and it's made to be as reliable as possible.
-
-## Settings
-
-Here we'll describe the settings you can configure on your Bottlerocket instance, and how to do it.
-
-(API endpoints are defined in our [OpenAPI spec](https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/sources/api/openapi.yaml) if you want more detail.)
-
-### Interacting with settings
-
-#### Using the API client
-
-You can see the current settings with an API request:
-
-```shell
-apiclient get settings
-```
-
-This will return all of the current settings in JSON format.
-For example, here's an abbreviated response:
-
-```json
-{"motd": "...", {"kubernetes": {}}}
-```
-
-You can change settings like this:
-
-```shell
-apiclient set motd="hi there" kubernetes.node-labels.environment=test
-```
-
-You can also use a JSON input mode to help change many related settings at once, and a "raw" mode if you want more control over how the settings are committed and applied to the system.
-See the [apiclient README](https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/sources/api/apiclient/) for details.
-
-#### Using user data
-
-If you know what settings you want to change when you start your Bottlerocket instance, you can send them in the user data.
-
-In user data, we structure the settings in TOML form to make things a bit simpler.
-Here's the user data to change the message of the day setting, as we did in the last section:
-
-```toml
-[settings]
-motd = "my own value!"
-```
-
-If your user data is over the size limit of the platform (e.g. 16KiB for EC2) you can compress the contents with gzip.
-(With [aws-cli](https://aws.amazon.com/cli/), you can use `--user-data fileb:///path/to/gz-file` to pass binary data.)
-
-### Description of settings
-
-Here we'll describe each setting you can change.
-
-**Note:** You can see the default values (for any settings that are not generated at runtime) by looking in the `defaults.d` directory for a variant, for example [aws-ecs-2](sources/models/src/aws-ecs-2/defaults.d/).
-
-When you're sending settings to the API, or receiving settings from the API, they're in a structured JSON format.
-This allows modification of any number of keys at once.
-It also lets us ensure that they fit the definition of the Bottlerocket data model - requests with invalid settings won't even parse correctly, helping ensure safety.
-
-Here, however, we'll use the shortcut "dotted key" syntax for referring to keys.
-This is used in some API endpoints with less-structured requests or responses.
-It's also more compact for our needs here.
-
-In this format, "settings.kubernetes.cluster-name" refers to the same key as in the JSON `{"settings": {"kubernetes": {"cluster-name": "value"}}}`.
-
-**NOTE:** [bottlerocket.dev](https://bottlerocket.dev/en/os/latest/#/api/settings/) now contains a complete, versioned setting reference.
-This documents retains the headings below for existing link and bookmark compatability.
-Please update your bookmarks and check out [bottlerocket.dev](https://bottlerocket.dev/) for future updates to the setting reference.
-
-#### Top-level settings
-
-See the [`settings.motd` reference](https://bottlerocket.dev/en/os/latest/#/api/settings/motd/).
-
-#### Kubernetes settings
-
-See the [`settings.kubernetes.*` reference](https://bottlerocket.dev/en/os/latest/#/api/settings/kubernetes/).
-
-#### Amazon ECS settings
-
-See the [`settings.ecs.*` reference](https://bottlerocket.dev/en/os/latest/#/api/settings/ecs/).
-
-#### CloudFormation signal helper settings
-
-See the [`settings.cloudformation.*` reference](https://bottlerocket.dev/en/os/latest/#/api/settings/cloudformation/).
-
-#### Auto Scaling group settings
-
-See the [`settings.autoscaling.*` reference](https://bottlerocket.dev/en/os/latest/#/api/settings/autoscaling/).
-
-#### OCI Hooks settings
-
-See the [`settings.oci-hooks.*` reference](https://bottlerocket.dev/en/os/latest/#/api/settings/oci-hooks/).
-
-#### OCI Defaults settings
-
-See the [`settings.oci-defaults.*` reference](https://bottlerocket.dev/en/os/latest/#/api/settings/oci-defaults/).
-
-##### OCI Defaults: Capabilities
-
-See the ["Capabilities Settings" section in the `settings.oci-defaults.*` reference](https://bottlerocket.dev/en/os/latest/#/api/settings/oci-defaults/).
-
-##### OCI Defaults: Resource Limits
-
-See the ["Resource Limits Settings" section in the `settings.oci-defaults.*` reference](https://bottlerocket.dev/en/os/latest/#/api/settings/oci-defaults/).
-  
-#### Container image registry settings
-
-See the [`settings.container-registry.*` reference](https://bottlerocket.dev/en/os/latest/#/api/settings/container-registry/).
-
-#### Container runtime settings
-
-See the [`settings.container-runtime.*` reference](https://bottlerocket.dev/en/os/latest/#/api/settings/container-runtime/).
-
-#### Updates settings
-
-See the [`settings.updates.*` reference](https://bottlerocket.dev/en/os/latest/#/api/settings/updates/).
-
-#### Network settings
-
-See the [`settings.network.*` reference](https://bottlerocket.dev/en/os/latest/#/api/settings/network/).
-
-##### Proxy settings
-
-See the ["Proxy Settings" section in the `settings.networks.*` reference](https://bottlerocket.dev/en/os/latest/#/api/settings/network/).
-  
-#### Metrics settings
-
-See the [`settings.metrics.*` reference](https://bottlerocket.dev/en/os/latest/#/api/settings/metrics/).
-
-#### Time settings
-
-See the [`settings.ntp.*` reference](https://bottlerocket.dev/en/os/latest/#/api/settings/ntp/).
-
-#### Kernel settings
-
-See the [`settings.kernel.*` reference](https://bottlerocket.dev/en/os/latest/#/api/settings/kernel/).
-
-#### Boot-related settings
-
-See the [`settings.boot.*` reference](https://bottlerocket.dev/en/os/latest/#/api/settings/boot/).
-
-#### Custom CA certificates settings
-
-See the [`settings.pki.*` reference](https://bottlerocket.dev/en/os/latest/#/api/settings/pki/).
-
-#### Host containers settings
-
-See the [`settings.host-containers.*` reference](https://bottlerocket.dev/en/os/latest/#/api/settings/host-containers/).
-
-##### Custom host containers
-
-See the [Host Containers documentation](https://bottlerocket.dev/en/os/latest/#/concepts/host-containers/).
-
-#### Bootstrap containers settings
-
-See the [`settings.bootstrap-containers.*` reference](https://bottlerocket.dev/en/os/latest/#/api/settings/bootstrap-containers/) as well as the [Bootstrap Containers documentation](https://bottlerocket.dev/en/os/latest/#/concepts/bootstrap-containers/)
-
-##### Mount propagations in bootstrap and superpowered containers
-
-Both bootstrap and superpowered host containers are configured with the `/.bottlerocket/rootfs/mnt` bind mount that points to `/mnt` in the host, which itself is a bind mount of `/local/mnt`.
-This bind mount is set up with shared propagations, so any new mount point created underneath `/.bottlerocket/rootfs/mnt` in any bootstrap or superpowered host container will propagate across mount namespaces.
-You can use this feature to configure ephemeral disks attached to your hosts that you may want to use on your workloads.
-
-#### Platform-specific settings
-
-Platform-specific settings are automatically set at boot time by [early-boot-config](https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/sources/early-boot-config/early-boot-config) based on metadata available on the running platform.
-They can be overridden for testing purposes in [the same way as other settings](#interacting-with-settings).
-
-##### AWS-specific settings
-
-See the [`settings.aws.*` reference](https://bottlerocket.dev/en/os/latest/#/api/settings/aws/).
-
-### Logs
-
-You can use `logdog` through the [admin container](#admin-container) to obtain an archive of log files from your Bottlerocket host.
-
-For a list of what is collected, see the logdog [command list](https://github.com/bottlerocket-os/bottlerocket-core-kit/blob/develop/sources/logdog/src/log_request.rs).
-
-#### Generating logs
-
-SSH to the Bottlerocket host or `apiclient exec admin bash` to access the admin container, then run:
-
-```shell
-sudo sheltie
-logdog
-```
-
-This will write an archive of the logs to `/var/log/support/bottlerocket-logs.tar.gz`.
-This archive is accessible from host containers at `/.bottlerocket/support`.
-
-#### Fetching logs
-
-There are multiple methods to retrieve the generated log archive.
-
-- **Via SSH if already enabled**
-
-    Once you have exited from the Bottlerocket host, run a command like:
-
-    ```shell
-    ssh -i YOUR_KEY_FILE \
-    ec2-user@YOUR_HOST \
-    "cat /.bottlerocket/support/bottlerocket-logs.tar.gz" > bottlerocket-logs.tar.gz
-    ```
-
-- **With `kubectl get` if running Kubernetes**
-
-    ```shell
-    kubectl get --raw \
-    "/api/v1/nodes/NODE_NAME/proxy/logs/support/bottlerocket-logs.tar.gz" > bottlerocket-logs.tar.gz
-    ```
-
-- **Using [SSH over SSM](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-getting-started-enable-ssh-connections.html) if your instance isn't accessible through SSH or Kubernetes**
-
-### Kdump Support
-
-Bottlerocket provides support to collect kernel crash dumps whenever the system kernel panics.
-Once this happens, both the dmesg log and vmcore dump are stored at `/var/log/kdump`, and the system reboots.
-
-There are a few important caveats about the provided kdump support:
-
-* Currently, only vmware variants have kdump support enabled
-* The system kernel will reserve 256MB for the crash kernel, only when the host has at least 2GB of memory; the reserved space won't be available for processes running in the host
-* The crash kernel will only be loaded when the `crashkernel` parameter is present in the kernel's cmdline and if there is memory reserved for it
-
-### NVIDIA GPUs Support
-
-Bottlerocket's `nvidia` variants include the required packages and configurations to leverage NVIDIA GPUs.
-Currently, the following NVIDIA driver versions are supported in Bottlerocket:
-
-* 470.X
-* 515.X
-
-The official AMIs for these variants can be used with EC2 GPU-equipped instance types such as: `p2`, `p3`, `p4`, `g3`, `g4dn`, `g5` and `g5g`.
-Note that older instance types, such as `p2`, are not supported by NVIDIA driver `515.X` and above.
-You need to make sure you select the appropriate AMI depending on the instance type you are planning to use.
-Please see [QUICKSTART-EKS](QUICKSTART-EKS.md#aws-k8s--nvidia-variants) for further details about Kubernetes variants, and [QUICKSTART-ECS](QUICKSTART-ECS.md#aws-ecs--nvidia-variants) for ECS variants.
-
-## Details
-
-### Security
-
-:shield: :crab:
-
-To learn more about security features in Bottlerocket, please see [SECURITY FEATURES](SECURITY_FEATURES.md).
-It describes how we use features like [dm-verity](https://gitlab.com/cryptsetup/cryptsetup/wikis/DMVerity) and [SELinux](https://selinuxproject.org/) to protect the system from security threats.
-
-To learn more about security recommendations for Bottlerocket, please see [SECURITY GUIDANCE](SECURITY_GUIDANCE.md).
-It documents additional steps you can take to secure the OS, and includes resources such as a [Pod Security Policy](https://kubernetes.io/docs/concepts/policy/pod-security-policy/) for your reference.
-
-In addition, almost all first-party components are written in [Rust](https://www.rust-lang.org/).
-Rust eliminates some classes of memory safety issues, and encourages design patterns that help security.
-
-### Packaging
-
-Bottlerocket is built from source using a container toolchain.
-We use RPM package definitions to build and install individual packages into an image.
-RPM itself is not in the image - it's just a common and convenient package definition format.
-
-We currently package the following major third-party components:
-
-* Linux kernel ([background](https://en.wikipedia.org/wiki/Linux), [5.10 packaging](https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/packages/kernel-5.10/), [5.15 packaging](https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/packages/kernel-5.15/))
-* glibc ([background](https://www.gnu.org/software/libc/), [packaging](https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/packages/glibc/))
-* Buildroot as build toolchain ([background](https://buildroot.org/), via the [SDK](https://github.com/bottlerocket-os/bottlerocket-sdk))
-* GRUB, with patches for partition flip updates ([background](https://www.gnu.org/software/grub/), [packaging](https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/packages/grub/))
-* systemd as init ([background](https://en.wikipedia.org/wiki/Systemd), [packaging](https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/packages/systemd/))
-* wicked for networking ([background](https://github.com/openSUSE/wicked), [packaging](https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/packages/wicked/))
-* containerd ([background](https://containerd.io/), [packaging](https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/packages/containerd/))
-* Kubernetes ([background](https://kubernetes.io/), [packaging](https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/packages/kubernetes-1.30/))
-* aws-iam-authenticator ([background](https://github.com/kubernetes-sigs/aws-iam-authenticator), [packaging](https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/packages/aws-iam-authenticator/))
-* Amazon ECS agent ([background](https://github.com/aws/amazon-ecs-agent), [packaging](https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/packages/ecs-agent/))
-
-For further documentation or to see the rest of the packages, see the [packaging directory](https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/packages/).
-
-### Updates
-
-The Bottlerocket image has two identical sets of partitions, A and B.
-When updating Bottlerocket, the partition table is updated to point from set A to set B, or vice versa.
-
-We also track successful boots, and if there are failures it will automatically revert back to the prior working partition set.
-
-The update process uses images secured by [TUF](https://theupdateframework.github.io/).
-For more details, see the [update system documentation](https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/sources/updater).
-
-### API
-
-There are two main ways you'd interact with a production Bottlerocket instance.
-(There are a couple more [exploration](#exploration) methods above for test instances.)
-
-The first method is through a container orchestrator, for when you want to run or manage containers.
-This uses the standard channel for your orchestrator, for example a tool like `kubectl` for Kubernetes.
-
-The second method is through the Bottlerocket API, for example when you want to configure the system.
-
-There's an HTTP API server that listens on a local Unix-domain socket.
-Remote access to the API requires an authenticated transport such as SSM's RunCommand or Session Manager, as described above.
-For more details, see the [apiserver documentation](https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/sources/api/apiserver/).
-
-The [apiclient](https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/sources/api/apiclient/) can be used to make requests.
-They're just HTTP requests, but the API client simplifies making requests with the Unix-domain socket.
-
-To make configuration easier, we have [early-boot-config](https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/sources/early-boot-config/early-boot-config), which can send an API request for you based on instance user data.
-If you start a virtual machine, like an EC2 instance, it will read TOML-formatted Bottlerocket configuration from user data and send it to the API server.
-This way, you can configure your Bottlerocket instance without having to make API calls after launch.
-
-See [Settings](#settings) above for examples and to understand what you can configure.
-
-You can also access host containers through the API using [apiclient exec](https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/sources/api/apiclient#exec-mode).
-
-The server and client are the user-facing components of the API system, but there are a number of other components that work together to make sure your settings are applied, and that they survive upgrades of Bottlerocket.
-
-For more details, see the [API system documentation](https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/sources/api).
-
-### Default Volumes
-
-Bottlerocket operates with two default storage volumes.
-
-* The root device, holds the active and passive [partition sets](#updates-1).
-  It also contains the bootloader, the dm-verity hash tree for verifying the [immutable root filesystem](SECURITY_FEATURES.md#immutable-rootfs-backed-by-dm-verity), and the data store for the Bottlerocket API.
-* The data device is used as persistent storage for container images, container orchestration, [host-containers](#Custom-host-containers), and [bootstrap containers](#Bootstrap-containers-settings).
-  The operating system does not typically make changes to this volume during regular updates, though changes to upstream software such as containerd or kubelet could result in changes to their stored data.
-  This device (mounted to `/local` on the host) can be used for application storage for orchestrated workloads; however, we recommend using an additional volume if possible for such cases.
-  See [this section of the Security Guidance documentation](./SECURITY_GUIDANCE.md#limit-access-to-system-mounts) for more information.
-
-On boot Bottlerocket will increase the data partition size to use all of the data device.
-If you increase the size of the device, you can reboot Bottlerocket to extend the data partition.
-If you need to extend the data partition without rebooting, have a look at this [discussion](https://github.com/bottlerocket-os/bottlerocket/discussions/2011).
+<div class="Box-sc-g0xbh4-0 bJMeLZ js-snippet-clipboard-copy-unpositioned" data-hpc="true"><article class="markdown-body entry-content container-lg" itemprop="text"><div class="markdown-heading" dir="auto"><h1 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Bottlerocket 操作系统</font></font></h1><a id="user-content-bottlerocket-os" class="anchor" aria-label="永久链接：Bottlerocket OS" href="#bottlerocket-os"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">欢迎来到 Bottlerocket！</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Bottlerocket 是一个免费的开源基于 Linux 的操作系统，用于托管容器。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">要了解有关 Bottlerocket 的更多信息，请访问</font></font><a href="https://bottlerocket.dev/" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Bottlerocket 官方网站和文档</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。 否则，如果您已准备好立即开始，请阅读我们的设置指南之一，了解如何在</font></font><a href="/bottlerocket-os/bottlerocket/blob/develop/QUICKSTART-EKS.md"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Amazon EKS</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">、</font></font><a href="/bottlerocket-os/bottlerocket/blob/develop/QUICKSTART-ECS.md"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Amazon ECS</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">或</font></font><a href="/bottlerocket-os/bottlerocket/blob/develop/QUICKSTART-VMWARE.md"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">VMware</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">中运行Bottlerocket。 如果您有兴趣在裸机服务器上运行 Bottlerocket，请参阅</font></font><a href="/bottlerocket-os/bottlerocket/blob/develop/PROVISIONING-METAL.md"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">配置指南</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">以开始使用。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Bottlerocket 专注于安全性和可维护性，为基于容器的工作负载提供可靠、一致且安全的平台。这反映了我们在 Amazon 构建操作系统和服务时所学到的知识。您可以在</font></font><a href="/bottlerocket-os/bottlerocket/blob/develop/CHARTER.md"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">我们的章程</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">中详细了解我们的驱动力。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">基础操作系统具备可靠运行容器所需的一切，并且采用标准开源组件构建。Bottlerocket 特定的附加功能专注于可靠的更新和 API。您无需手动更改配置，只需通过 API 调用即可更改设置，并且这些更改会通过更新自动迁移。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">一些值得注意的特点包括：</font></font></p>
+<ul dir="auto">
+<li><a href="#api"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">用于配置系统的API 访问</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">，并在您需要时</font><font style="vertical-align: inherit;">使用安全的带外</font></font><a href="#exploration"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">访问方法。</font></font></a><font style="vertical-align: inherit;"></font></li>
+<li><a href="#updates"><font style="vertical-align: inherit;"></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">基于分区翻转的</font><a href="#updates"><font style="vertical-align: inherit;">更新，实现快速可靠的系统更新。</font></a></font></li>
+<li><a href="#settings"><font style="vertical-align: inherit;"></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">通过更新自动迁移的</font><a href="#settings"><font style="vertical-align: inherit;">建模配置。</font></a></font></li>
+<li><a href="#security"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">安全</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">是重中之重。</font></font></li>
+</ul>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">参与社区</font></font></h2><a id="user-content-participate-in-the-community" class="anchor" aria-label="永久链接：参与社区" href="#participate-in-the-community"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">参与 Bottlerocket 社区的方式有很多种：</font></font></p>
+<ul dir="auto">
+<li>
+<p dir="auto"><a href="https://www.meetup.com/bottlerocket-community/" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">加入我们的 Meetup</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">，了解最新的 Bottlerocket（虚拟/面对面）活动和社区会议。社区会议通常每隔一周举行一次。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"></font><a href="https://www.meetup.com/bottlerocket-community/events/" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">详细信息可在Meetup 的活动部分</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">找到</font><font style="vertical-align: inherit;">，如果您成为 Meetup 小组的成员，您将收到电子邮件通知。（加入免费！）</font></font></p>
+</li>
+<li>
+<p dir="auto"><a href="https://github.com/bottlerocket-os/bottlerocket/discussions"><font style="vertical-align: inherit;"></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如果您对 Bottlerocket 有任何疑问，</font><a href="https://github.com/bottlerocket-os/bottlerocket/discussions"><font style="vertical-align: inherit;">请开始或加入讨论。</font></a></font></p>
+</li>
+<li>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如果您有兴趣做出贡献，谢谢！请参阅我们的</font></font><a href="/bottlerocket-os/bottlerocket/blob/develop/CONTRIBUTING.md"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">贡献者指南</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+</li>
+</ul>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">联系我们</font></font></h2><a id="user-content-contact-us" class="anchor" aria-label="永久链接：联系我们" href="#contact-us"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如果您发现安全问题，请</font></font><a href="https://github.com/bottlerocket-os/bottlerocket/security/policy"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">联系我们的安全团队</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">，而不是提出问题。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">我们使用 GitHub 问题来跟踪其他错误报告和功能请求。您可以查看</font></font><a href="https://github.com/bottlerocket-os/bottlerocket/issues"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">现有问题</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">，看看您的问题是否已被人知晓。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如果没有，您可以从几个模板中进行选择，并获得一些有关最有帮助的信息类型的指导。
+</font></font><a href="https://github.com/bottlerocket-os/bottlerocket/issues/new/choose"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如有新问题，请在此处联系我们。</font></font></a></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">我们尚未设置其他沟通渠道，但不必担心提出问题或讨论主题！您可以告诉我们看似困难的事情，甚至可以告诉我们您可能想要提供帮助的方式。</font></font></p>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">变体</font></font></h2><a id="user-content-variants" class="anchor" aria-label="固定链接：变体" href="#variants"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">首先，我们专注于将 Bottlerocket 用作 AWS EKS Kubernetes 集群和 Amazon ECS 集群中的主机操作系统。我们很高兴收到早期反馈，并继续致力于更多用例！</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Bottlerocket 的架构设计使得未来可以支持不同的云环境和容器编排器。支持不同功能或集成特性的 Bottlerocket 版本称为“变体”。版本的工件将包括架构和变体名称。例如，变体</font></font><code>x86_64</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">的版本</font></font><code>aws-k8s-1.24</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">将生成一个名为 的图像</font></font><code>bottlerocket-aws-k8s-1.24-x86_64-&lt;version&gt;-&lt;commit&gt;.img</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如上所述，以下变体支持 EKS：</font></font></p>
+<ul dir="auto">
+<li><code>aws-k8s-1.23</code></li>
+<li><code>aws-k8s-1.24</code></li>
+<li><code>aws-k8s-1.25</code></li>
+<li><code>aws-k8s-1.26</code></li>
+<li><code>aws-k8s-1.27</code></li>
+<li><code>aws-k8s-1.28</code></li>
+<li><code>aws-k8s-1.29</code></li>
+<li><code>aws-k8s-1.30</code></li>
+<li><code>aws-k8s-1.23-nvidia</code></li>
+<li><code>aws-k8s-1.24-nvidia</code></li>
+<li><code>aws-k8s-1.25-nvidia</code></li>
+<li><code>aws-k8s-1.26-nvidia</code></li>
+<li><code>aws-k8s-1.27-nvidia</code></li>
+<li><code>aws-k8s-1.28-nvidia</code></li>
+<li><code>aws-k8s-1.29-nvidia</code></li>
+<li><code>aws-k8s-1.30-nvidia</code></li>
+</ul>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">以下变体支持 ECS：</font></font></p>
+<ul dir="auto">
+<li><code>aws-ecs-1</code></li>
+<li><code>aws-ecs-1-nvidia</code></li>
+<li><code>aws-ecs-2</code></li>
+<li><code>aws-ecs-2-nvidia</code></li>
+</ul>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">我们还有一些变体，专门设计为 VMware 中的 Kubernetes 工作节点：</font></font></p>
+<ul dir="auto">
+<li><code>vmware-k8s-1.27</code></li>
+<li><code>vmware-k8s-1.28</code></li>
+<li><code>vmware-k8s-1.29</code></li>
+<li><code>vmware-k8s-1.30</code></li>
+</ul>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">以下变体被设计为裸机上的 Kubernetes 工作节点：</font></font></p>
+<ul dir="auto">
+<li><code>metal-k8s-1.27</code></li>
+<li><code>metal-k8s-1.28</code></li>
+<li><code>metal-k8s-1.29</code></li>
+</ul>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">以下变体不再受支持：</font></font></p>
+<ul dir="auto">
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">所有使用 Kubernetes 1.22 及更早版本的 Kubernetes 变体</font></font></li>
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">使用 Kubernetes 1.26 及更早版本的裸机和 VMware 变体</font></font></li>
+</ul>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">我们建议用户将运行这些变体的节点替换为</font></font><a href="/bottlerocket-os/bottlerocket/blob/develop/variants"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">与其集群兼容的最新版本</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">架构</font></font></h2><a id="user-content-architectures" class="anchor" aria-label="永久链接：建筑" href="#architectures"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">我们支持的架构包括</font></font><code>x86_64</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">和（</font><font style="vertical-align: inherit;">在某些情况下</font></font><code>aarch64</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">写为）。</font></font><code>arm64</code><font style="vertical-align: inherit;"></font></p>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">设置</font></font></h2><a id="user-content-setup" class="anchor" aria-label="固定链接：设置" href="#setup"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">🚶 🏃</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Bottlerocket 最适合与容器编排器一起使用。要开始在 Amazon EKS 中使用 Kubernetes，请参阅</font></font><a href="/bottlerocket-os/bottlerocket/blob/develop/QUICKSTART-EKS.md"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">QUICKSTART-EKS</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。要开始在 VMware 中使用 Kubernetes，请参阅</font></font><a href="/bottlerocket-os/bottlerocket/blob/develop/QUICKSTART-VMWARE.md"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">QUICKSTART-VMWARE</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。要开始使用 Amazon ECS，请参阅</font></font><a href="/bottlerocket-os/bottlerocket/blob/develop/QUICKSTART-ECS.md"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">QUICKSTART-ECS</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。这些指南描述了：</font></font></p>
+<ul dir="auto">
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如何使用编排器设置集群，以便您的 Bottlerocket 实例可以运行容器</font></font></li>
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如何在 EC2 或 VMware 中启动 Bottlerocket 实例</font></font></li>
+</ul>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">要了解如何在裸机上配置 Bottlerocket，请参阅</font></font><a href="/bottlerocket-os/bottlerocket/blob/develop/PROVISIONING-METAL.md"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">PROVISIONING-METAL</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">要构建您自己的 Bottlerocket 镜像，请参阅</font></font><a href="/bottlerocket-os/bottlerocket/blob/develop/BUILDING.md"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">BUILDING</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。它描述了：</font></font></p>
+<ul dir="auto">
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如何塑造形象</font></font></li>
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如何从镜像注册 EC2 AMI</font></font></li>
+</ul>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">要发布您构建的 Bottlerocket 镜像，请参阅</font></font><a href="/bottlerocket-os/bottlerocket/blob/develop/PUBLISHING.md"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">发布</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。它描述了：</font></font></p>
+<ul dir="auto">
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如何制作包含你的图片的 TUF repos</font></font></li>
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如何跨区域复制您的 AMI</font></font></li>
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如何将您的 AMI 标记为公开或授予特定账户访问权限</font></font></li>
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如何使用</font></font><a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">SSM 参数让您的 AMI 可被发现</font></font></a></li>
+</ul>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">勘探</font></font></h2><a id="user-content-exploration" class="anchor" aria-label="固定链接：探索" href="#exploration"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">为了提高安全性，Bottlerocket 映像中没有 SSH 服务器，甚至没有 shell。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">不要恐慌！</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">您可以使用几种带外访问方法来探索 Bottlerocket，就像探索典型的 Linux 系统一样。任一选项都会为您提供 Bottlerocket 内的 shell。从那里，您可以</font></font><a href="#settings"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">更改设置</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">、手动</font></font><a href="#updates"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">更新 Bottlerocket</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">、调试问题以及进行一般探索。</font></font></p>
+<p dir="auto"><strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">注意：</font></font></strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">这些方法要求您的实例有权访问这些容器所在的 ECR 存储库；要添加到您实例的 IAM 角色的适当策略是</font></font><code>AmazonEC2ContainerRegistryReadOnly</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h3 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">控制容器</font></font></h3><a id="user-content-control-container" class="anchor" aria-label="永久链接：控制容器" href="#control-container"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Bottlerocket 有一个</font><font style="vertical-align: inherit;">默认启用的</font></font><a href="https://github.com/bottlerocket-os/bottlerocket-control-container"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">“控制”容器，它在编排器之外的单独的 containerd 实例中运行。此容器运行</font></font></a><font style="vertical-align: inherit;"></font><a href="https://github.com/aws/amazon-ssm-agent"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">AWS SSM 代理</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">，可让您在 EC2 中的 Bottlerocket 实例上运行命令或启动 shell 会话。（您只需更改 URI 即可轻松用自己的容器替换此控制容器；请参阅</font></font><a href="#settings"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">设置</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。）</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">在 AWS 中，您需要为您的实例赋予 SSM 角色才能使其正常工作；请参阅</font></font><a href="/bottlerocket-os/bottlerocket/blob/develop/QUICKSTART-EKS.md#enabling-ssm"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">设置指南</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。在 AWS 之外，您可以将</font></font><a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-managedinstances.html" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">AWS Systems Manager 用于混合环境。</font></font></a><font style="vertical-align: inherit;"></font><a href="https://github.com/bottlerocket-os/bottlerocket-control-container/#connecting-to-aws-systems-manager-ssm"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">控制容器文档</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">中提供了有关混合环境的更多详细信息</font><font style="vertical-align: inherit;">。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">一旦实例启动，您就可以启动会话：</font></font></p>
+<ul dir="auto">
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">转到 AWS SSM 的</font></font><a href="https://console.aws.amazon.com/systems-manager/session-manager/sessions" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">会话管理器</font></font></a></li>
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">选择“开始会话”并选择您的 Bottlerocket 实例</font></font></li>
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">再次选择“Start session”获取shell</font></font></li>
+</ul>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如果您更喜欢使用命令行工具，则可以使用最新的</font></font><a href="https://aws.amazon.com/cli/" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">AWS CLI</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">和</font></font><a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">session-manager-plugin</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">启动会话。然后，您将能够仅使用实例 ID 启动会话，如下所示：</font></font></p>
+<div class="highlight highlight-source-shell notranslate position-relative overflow-auto" dir="auto"><pre>aws ssm start-session --target INSTANCE_ID</pre><div class="zeroclipboard-container">
+    <clipboard-copy aria-label="Copy" class="ClipboardButton btn btn-invisible js-clipboard-copy m-2 p-0 tooltipped-no-delay d-flex flex-justify-center flex-items-center" data-copy-feedback="Copied!" data-tooltip-direction="w" value="aws ssm start-session --target INSTANCE_ID" tabindex="0" role="button">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-copy js-clipboard-copy-icon">
+    <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+</svg>
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check js-clipboard-check-icon color-fg-success d-none">
+    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+</svg>
+    </clipboard-copy>
+  </div></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">使用</font></font><a href="https://github.com/bottlerocket-os/bottlerocket-control-container"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">默认控制容器</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">，您可以进行</font></font><a href="#api"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">API 调用</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">来配置和管理 Bottlerocket 主机。要执行更多操作，请阅读下一部分有关</font></font><a href="#admin-container"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">管理容器</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">的内容。您可以像这样从控制容器访问管理容器：</font></font></p>
+<div class="highlight highlight-source-shell notranslate position-relative overflow-auto" dir="auto"><pre>enter-admin-container</pre><div class="zeroclipboard-container">
+    <clipboard-copy aria-label="Copy" class="ClipboardButton btn btn-invisible js-clipboard-copy m-2 p-0 tooltipped-no-delay d-flex flex-justify-center flex-items-center" data-copy-feedback="Copied!" data-tooltip-direction="w" value="enter-admin-container" tabindex="0" role="button">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-copy js-clipboard-copy-icon">
+    <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+</svg>
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check js-clipboard-check-icon color-fg-success d-none">
+    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+</svg>
+    </clipboard-copy>
+  </div></div>
+<div class="markdown-heading" dir="auto"><h3 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">管理容器</font></font></h3><a id="user-content-admin-container" class="anchor" aria-label="永久链接：管理容器" href="#admin-container"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Bottlerocket 有一个</font></font><a href="https://github.com/bottlerocket-os/bottlerocket-admin-container"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">管理容器</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">，默认情况下处于禁用状态，它在编排器之外的 containerd 单独实例中运行。此容器有一个 SSH 服务器，可让您</font></font><code>ec2-user</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">使用 EC2 注册的 SSH 密钥登录。在 AWS 之外，您可以</font></font><a href="https://github.com/bottlerocket-os/bottlerocket-admin-container#authenticating-with-the-admin-container"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">传入自己的 SSH 密钥</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。（只需更改 URI，即可轻松将此管理容器替换为您自己的容器；请参阅</font></font><a href="#settings"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">设置</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">要启用容器，您可以在启动Bottlerocket时更改用户数据中的设置，例如EC2实例用户数据：</font></font></p>
+<div class="highlight highlight-source-toml notranslate position-relative overflow-auto" dir="auto"><pre>[<span class="pl-en">settings</span>.<span class="pl-en">host-containers</span>.<span class="pl-en">admin</span>]
+<span class="pl-smi">enabled</span> = <span class="pl-c1">true</span></pre><div class="zeroclipboard-container">
+    <clipboard-copy aria-label="Copy" class="ClipboardButton btn btn-invisible js-clipboard-copy m-2 p-0 tooltipped-no-delay d-flex flex-justify-center flex-items-center" data-copy-feedback="Copied!" data-tooltip-direction="w" value="[settings.host-containers.admin]
+enabled = true" tabindex="0" role="button">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-copy js-clipboard-copy-icon">
+    <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+</svg>
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check js-clipboard-check-icon color-fg-success d-none">
+    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+</svg>
+    </clipboard-copy>
+  </div></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如果 Bottlerocket 已在运行，您可以</font><font style="vertical-align: inherit;">像这样从默认</font></font><a href="#control-container"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">控制容器启用管理容器：</font></font></a><font style="vertical-align: inherit;"></font></p>
+<div class="highlight highlight-source-shell notranslate position-relative overflow-auto" dir="auto"><pre>enable-admin-container</pre><div class="zeroclipboard-container">
+    <clipboard-copy aria-label="Copy" class="ClipboardButton btn btn-invisible js-clipboard-copy m-2 p-0 tooltipped-no-delay d-flex flex-justify-center flex-items-center" data-copy-feedback="Copied!" data-tooltip-direction="w" value="enable-admin-container" tabindex="0" role="button">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-copy js-clipboard-copy-icon">
+    <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+</svg>
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check js-clipboard-check-icon color-fg-success d-none">
+    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+</svg>
+    </clipboard-copy>
+  </div></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">或者您可以像这样立即开始交互式会话：</font></font></p>
+<div class="highlight highlight-source-shell notranslate position-relative overflow-auto" dir="auto"><pre>enter-admin-container</pre><div class="zeroclipboard-container">
+    <clipboard-copy aria-label="Copy" class="ClipboardButton btn btn-invisible js-clipboard-copy m-2 p-0 tooltipped-no-delay d-flex flex-justify-center flex-items-center" data-copy-feedback="Copied!" data-tooltip-direction="w" value="enter-admin-container" tabindex="0" role="button">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-copy js-clipboard-copy-icon">
+    <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+</svg>
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check js-clipboard-check-icon color-fg-success d-none">
+    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+</svg>
+    </clipboard-copy>
+  </div></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如果您使用自定义控制容器，或者想要直接进行 API 调用，则可以像这样启用管理容器：</font></font></p>
+<div class="highlight highlight-source-shell notranslate position-relative overflow-auto" dir="auto"><pre>apiclient <span class="pl-c1">set</span> host-containers.admin.enabled=true</pre><div class="zeroclipboard-container">
+    <clipboard-copy aria-label="Copy" class="ClipboardButton btn btn-invisible js-clipboard-copy m-2 p-0 tooltipped-no-delay d-flex flex-justify-center flex-items-center" data-copy-feedback="Copied!" data-tooltip-direction="w" value="apiclient set host-containers.admin.enabled=true" tabindex="0" role="button">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-copy js-clipboard-copy-icon">
+    <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+</svg>
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check js-clipboard-check-icon color-fg-success d-none">
+    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+</svg>
+    </clipboard-copy>
+  </div></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">一旦启用了管理容器，您就可以通过 SSH 访问它，或者从控制容器执行命令，如下所示：</font></font></p>
+<div class="highlight highlight-source-shell notranslate position-relative overflow-auto" dir="auto"><pre>apiclient <span class="pl-c1">exec</span> admin bash</pre><div class="zeroclipboard-container">
+    <clipboard-copy aria-label="Copy" class="ClipboardButton btn btn-invisible js-clipboard-copy m-2 p-0 tooltipped-no-delay d-flex flex-justify-center flex-items-center" data-copy-feedback="Copied!" data-tooltip-direction="w" value="apiclient exec admin bash" tabindex="0" role="button">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-copy js-clipboard-copy-icon">
+    <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+</svg>
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check js-clipboard-check-icon color-fg-success d-none">
+    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+</svg>
+    </clipboard-copy>
+  </div></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">进入管理容器后，您可以运行</font></font><code>sheltie</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">以在 Bottlerocket 主机中获取完整的 root shell。请注意；虽然您可以以 root 身份检查和更改更多内容，但 Bottlerocket 的文件系统和 dm-verity 设置将阻止大多数更改在重启后保留 - 请参阅</font></font><a href="#security"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">安全性</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">更新</font></font></h2><a id="user-content-updates" class="anchor" aria-label="固定链接：更新" href="#updates"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Bottlerocket 并非使用包管理器来更新单个软件，而是下载完整的文件系统映像并重新启动。如果发生启动失败，它可以自动回滚，而工作负载失败可以触发手动回滚。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">更新过程使用受</font></font><a href="https://theupdateframework.github.io/" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">TUF</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">保护的图像。有关更多详细信息，请参阅</font></font><a href="/bottlerocket-os/bottlerocket/blob/develop/sources/updater"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">更新系统文档</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h3 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">更新方法</font></font></h3><a id="user-content-update-methods" class="anchor" aria-label="永久链接：更新方法" href="#update-methods"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">有多种方法可以更新您的 Bottlerocket 主机。我们提供用于自动更新主机的工具，以及用于直接控制更新的 API。</font></font></p>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">自动更新</font></font></h4><a id="user-content-automated-updates" class="anchor" aria-label="永久链接：自动更新" href="#automated-updates"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">对于 Bottlerocket 的 EKS 变体，我们建议使用</font></font><a href="https://github.com/bottlerocket-os/bottlerocket-update-operator"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Bottlerocket 更新运算符</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">进行自动更新。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">对于 Bottlerocket 的 ECS 变体，我们建议使用</font></font><a href="https://github.com/bottlerocket-os/bottlerocket-ecs-updater/"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Bottlerocket ECS 更新程序</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">进行自动更新。</font></font></p>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">更新 API</font></font></h4><a id="user-content-update-api" class="anchor" aria-label="永久链接：更新 API" href="#update-api"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"></font><a href="#api"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Bottlerocket API</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">包括检查和启动系统更新的方法。您可以在我们的</font></font><a href="/bottlerocket-os/bottlerocket/blob/develop/sources/updater/README.md#update-api"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">更新系统文档</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">中阅读有关更新 API 的更多信息</font><font style="vertical-align: inherit;">。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">apiclient 知道如何为您处理这些更新 API，并且您可以从</font></font><a href="#control-container"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">控制</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">或</font></font><a href="#admin-container"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">管理</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">容器运行它。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">要查看有哪些可用更新：</font></font></p>
+<div class="highlight highlight-source-shell notranslate position-relative overflow-auto" dir="auto"><pre>apiclient update check</pre><div class="zeroclipboard-container">
+    <clipboard-copy aria-label="Copy" class="ClipboardButton btn btn-invisible js-clipboard-copy m-2 p-0 tooltipped-no-delay d-flex flex-justify-center flex-items-center" data-copy-feedback="Copied!" data-tooltip-direction="w" value="apiclient update check" tabindex="0" role="button">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-copy js-clipboard-copy-icon">
+    <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+</svg>
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check js-clipboard-check-icon color-fg-success d-none">
+    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+</svg>
+    </clipboard-copy>
+  </div></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如果有可用更新，它将显示在</font></font><code>chosen_update</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">字段中。该</font></font><code>available_updates</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">字段将显示可用版本的完整列表，包括旧版本，因为 Bottlerocket 支持安全回滚。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">要应用最新更新：</font></font></p>
+<div class="highlight highlight-source-shell notranslate position-relative overflow-auto" dir="auto"><pre>apiclient update apply</pre><div class="zeroclipboard-container">
+    <clipboard-copy aria-label="Copy" class="ClipboardButton btn btn-invisible js-clipboard-copy m-2 p-0 tooltipped-no-delay d-flex flex-justify-center flex-items-center" data-copy-feedback="Copied!" data-tooltip-direction="w" value="apiclient update apply" tabindex="0" role="button">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-copy js-clipboard-copy-icon">
+    <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+</svg>
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check js-clipboard-check-icon color-fg-success d-none">
+    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+</svg>
+    </clipboard-copy>
+  </div></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">下次重启时，您将以新版本启动，系统配置将自动</font></font><a href="/bottlerocket-os/bottlerocket/blob/develop/sources/api/migration"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">迁移</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。要立即重启：</font></font></p>
+<div class="highlight highlight-source-shell notranslate position-relative overflow-auto" dir="auto"><pre>apiclient reboot</pre><div class="zeroclipboard-container">
+    <clipboard-copy aria-label="Copy" class="ClipboardButton btn btn-invisible js-clipboard-copy m-2 p-0 tooltipped-no-delay d-flex flex-justify-center flex-items-center" data-copy-feedback="Copied!" data-tooltip-direction="w" value="apiclient reboot" tabindex="0" role="button">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-copy js-clipboard-copy-icon">
+    <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+</svg>
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check js-clipboard-check-icon color-fg-success d-none">
+    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+</svg>
+    </clipboard-copy>
+  </div></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如果您对更新有信心，该</font></font><code>apiclient update apply</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">命令具有</font></font><code>--check</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">和</font></font><code>--reboot</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">标志来组合上述操作，因此您可以像这样完成上述所有步骤：</font></font></p>
+<div class="highlight highlight-source-shell notranslate position-relative overflow-auto" dir="auto"><pre>apiclient update apply --check --reboot</pre><div class="zeroclipboard-container">
+    <clipboard-copy aria-label="Copy" class="ClipboardButton btn btn-invisible js-clipboard-copy m-2 p-0 tooltipped-no-delay d-flex flex-justify-center flex-items-center" data-copy-feedback="Copied!" data-tooltip-direction="w" value="apiclient update apply --check --reboot" tabindex="0" role="button">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-copy js-clipboard-copy-icon">
+    <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+</svg>
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check js-clipboard-check-icon color-fg-success d-none">
+    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+</svg>
+    </clipboard-copy>
+  </div></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">有关更多详细信息，</font><font style="vertical-align: inherit;">请参阅</font></font><a href="/bottlerocket-os/bottlerocket/blob/develop/sources/api/apiclient"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">apiclient 文档。</font></font></a><font style="vertical-align: inherit;"></font></p>
+<div class="markdown-heading" dir="auto"><h3 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">更新回滚</font></font></h3><a id="user-content-update-rollback" class="anchor" aria-label="永久链接：更新回滚" href="#update-rollback"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如果无法启动，系统将自动回滚。如果更新对给定的容器工作负载不起作用，您可以手动回滚：</font></font></p>
+<div class="highlight highlight-source-shell notranslate position-relative overflow-auto" dir="auto"><pre>signpost rollback-to-inactive
+reboot</pre><div class="zeroclipboard-container">
+    <clipboard-copy aria-label="Copy" class="ClipboardButton btn btn-invisible js-clipboard-copy m-2 p-0 tooltipped-no-delay d-flex flex-justify-center flex-items-center" data-copy-feedback="Copied!" data-tooltip-direction="w" value="signpost rollback-to-inactive
+reboot" tabindex="0" role="button">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-copy js-clipboard-copy-icon">
+    <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+</svg>
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check js-clipboard-check-icon color-fg-success d-none">
+    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+</svg>
+    </clipboard-copy>
+  </div></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">这不需要任何外部通信，因此它比更快</font></font><code>apiclient</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">，并且尽可能可靠。</font></font></p>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">设置</font></font></h2><a id="user-content-settings" class="anchor" aria-label="固定链接：设置" href="#settings"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">在这里，我们将描述您可以在 Bottlerocket 实例上配置的设置以及如何执行这些设置。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">（如果您需要更多详细信息， API 端点在我们的</font></font><a href="https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/sources/api/openapi.yaml"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">OpenAPI 规范</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">中定义。）</font></font></p>
+<div class="markdown-heading" dir="auto"><h3 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">与设置交互</font></font></h3><a id="user-content-interacting-with-settings" class="anchor" aria-label="固定链接：与设置交互" href="#interacting-with-settings"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">使用 API 客户端</font></font></h4><a id="user-content-using-the-api-client" class="anchor" aria-label="永久链接：使用 API 客户端" href="#using-the-api-client"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">您可以通过 API 请求查看当前设置：</font></font></p>
+<div class="highlight highlight-source-shell notranslate position-relative overflow-auto" dir="auto"><pre>apiclient get settings</pre><div class="zeroclipboard-container">
+    <clipboard-copy aria-label="Copy" class="ClipboardButton btn btn-invisible js-clipboard-copy m-2 p-0 tooltipped-no-delay d-flex flex-justify-center flex-items-center" data-copy-feedback="Copied!" data-tooltip-direction="w" value="apiclient get settings" tabindex="0" role="button">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-copy js-clipboard-copy-icon">
+    <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+</svg>
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check js-clipboard-check-icon color-fg-success d-none">
+    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+</svg>
+    </clipboard-copy>
+  </div></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">这将以 JSON 格式返回所有当前设置。例如，以下是简短的响应：</font></font></p>
+<div class="highlight highlight-source-json notranslate position-relative overflow-auto" dir="auto"><pre>{<span class="pl-ent">"motd"</span>: <span class="pl-s"><span class="pl-pds">"</span>...<span class="pl-pds">"</span></span>, {<span class="pl-ent">"kubernetes"</span>: {}}}</pre><div class="zeroclipboard-container">
+    <clipboard-copy aria-label="Copy" class="ClipboardButton btn btn-invisible js-clipboard-copy m-2 p-0 tooltipped-no-delay d-flex flex-justify-center flex-items-center" data-copy-feedback="Copied!" data-tooltip-direction="w" value="{&quot;motd&quot;: &quot;...&quot;, {&quot;kubernetes&quot;: {}}}" tabindex="0" role="button">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-copy js-clipboard-copy-icon">
+    <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+</svg>
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check js-clipboard-check-icon color-fg-success d-none">
+    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+</svg>
+    </clipboard-copy>
+  </div></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">您可以像这样更改设置：</font></font></p>
+<div class="highlight highlight-source-shell notranslate position-relative overflow-auto" dir="auto"><pre>apiclient <span class="pl-c1">set</span> motd=<span class="pl-s"><span class="pl-pds">"</span>hi there<span class="pl-pds">"</span></span> kubernetes.node-labels.environment=test</pre><div class="zeroclipboard-container">
+    <clipboard-copy aria-label="Copy" class="ClipboardButton btn btn-invisible js-clipboard-copy m-2 p-0 tooltipped-no-delay d-flex flex-justify-center flex-items-center" data-copy-feedback="Copied!" data-tooltip-direction="w" value="apiclient set motd=&quot;hi there&quot; kubernetes.node-labels.environment=test" tabindex="0" role="button">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-copy js-clipboard-copy-icon">
+    <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+</svg>
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check js-clipboard-check-icon color-fg-success d-none">
+    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+</svg>
+    </clipboard-copy>
+  </div></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">您还可以使用 JSON 输入模式来帮助一次性更改许多相关设置，如果您想要更好地控制如何提交设置并将其应用于系统，则可以使用“原始”模式。有关详细信息，请参阅 apiclient </font></font><a href="https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/sources/api/apiclient/"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">README</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">使用用户数据</font></font></h4><a id="user-content-using-user-data" class="anchor" aria-label="永久链接：使用用户数据" href="#using-user-data"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如果您知道在启动 Bottlerocket 实例时想要更改哪些设置，则可以在用户数据中发送它们。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">在用户数据中，我们以 TOML 形式构造设置，以使事情变得简单一些。以下是用于更改每日消息设置的用户数据，就像我们在上一节中所做的那样：</font></font></p>
+<div class="highlight highlight-source-toml notranslate position-relative overflow-auto" dir="auto"><pre>[<span class="pl-en">settings</span>]
+<span class="pl-smi">motd</span> = <span class="pl-s"><span class="pl-pds">"</span>my own value!<span class="pl-pds">"</span></span></pre><div class="zeroclipboard-container">
+    <clipboard-copy aria-label="Copy" class="ClipboardButton btn btn-invisible js-clipboard-copy m-2 p-0 tooltipped-no-delay d-flex flex-justify-center flex-items-center" data-copy-feedback="Copied!" data-tooltip-direction="w" value="[settings]
+motd = &quot;my own value!&quot;" tabindex="0" role="button">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-copy js-clipboard-copy-icon">
+    <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+</svg>
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check js-clipboard-check-icon color-fg-success d-none">
+    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+</svg>
+    </clipboard-copy>
+  </div></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如果您的用户数据超出了平台的大小限制（例如 EC2 为 16KiB），您可以使用 gzip 压缩内容。（使用</font></font><a href="https://aws.amazon.com/cli/" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">aws-cli</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">，您可以用来</font></font><code>--user-data fileb:///path/to/gz-file</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">传递二进制数据。）</font></font></p>
+<div class="markdown-heading" dir="auto"><h3 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">设置说明</font></font></h3><a id="user-content-description-of-settings" class="anchor" aria-label="固定链接：设置说明" href="#description-of-settings"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">这里我们将描述您可以更改的每个设置。</font></font></p>
+<p dir="auto"><strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">注意：</font></font></strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">您可以通过在目录中查找变体来查看默认值（对于任何未在运行时生成的设置）</font></font><code>defaults.d</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">，例如</font></font><a href="/bottlerocket-os/bottlerocket/blob/develop/sources/models/src/aws-ecs-2/defaults.d"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">aws-ecs-2</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">当您向 API 发送设置或从 API 接收设置时，它们采用结构化的 JSON 格式。这样可以一次修改任意数量的键。它还让我们确保它们符合 Bottlerocket 数据模型的定义 - 具有无效设置的请求甚至无法正确解析，从而有助于确保安全。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">不过，在这里，我们将使用快捷方式“带点键”语法来引用键。这用于一些结构化程度较低的请求或响应的 API 端点。对于我们这里的需求来说，它也更紧凑。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">在此格式中，“settings.kubernetes.cluster-name”指的是与 JSON 中的相同的键</font></font><code>{"settings": {"kubernetes": {"cluster-name": "value"}}}</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<p dir="auto"><strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">注意：</font></font></strong> <a href="https://bottlerocket.dev/en/os/latest/#/api/settings/" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">bottlerocket.dev</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">现在包含完整的版本化设置参考。本文档保留了以下标题，以兼容现有链接和书签。请更新您的书签并查看</font></font><a href="https://bottlerocket.dev/" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">bottlerocket.dev</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">以获取设置参考的未来更新。</font></font></p>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">顶级设置</font></font></h4><a id="user-content-top-level-settings" class="anchor" aria-label="永久链接：顶级设置" href="#top-level-settings"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">请参阅</font></font><a href="https://bottlerocket.dev/en/os/latest/#/api/settings/motd/" rel="nofollow"><code>settings.motd</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">参考资料</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Kubernetes 设置</font></font></h4><a id="user-content-kubernetes-settings" class="anchor" aria-label="永久链接：Kubernetes 设置" href="#kubernetes-settings"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">请参阅</font></font><a href="https://bottlerocket.dev/en/os/latest/#/api/settings/kubernetes/" rel="nofollow"><code>settings.kubernetes.*</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">参考资料</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Amazon ECS 设置</font></font></h4><a id="user-content-amazon-ecs-settings" class="anchor" aria-label="永久链接：Amazon ECS 设置" href="#amazon-ecs-settings"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">请参阅</font></font><a href="https://bottlerocket.dev/en/os/latest/#/api/settings/ecs/" rel="nofollow"><code>settings.ecs.*</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">参考资料</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">CloudFormation 信号帮助程序设置</font></font></h4><a id="user-content-cloudformation-signal-helper-settings" class="anchor" aria-label="永久链接：CloudFormation 信号帮助程序设置" href="#cloudformation-signal-helper-settings"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">请参阅</font></font><a href="https://bottlerocket.dev/en/os/latest/#/api/settings/cloudformation/" rel="nofollow"><code>settings.cloudformation.*</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">参考资料</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Auto Scaling 组设置</font></font></h4><a id="user-content-auto-scaling-group-settings" class="anchor" aria-label="永久链接：Auto Scaling 组设置" href="#auto-scaling-group-settings"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">请参阅</font></font><a href="https://bottlerocket.dev/en/os/latest/#/api/settings/autoscaling/" rel="nofollow"><code>settings.autoscaling.*</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">参考资料</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">OCI Hooks 设置</font></font></h4><a id="user-content-oci-hooks-settings" class="anchor" aria-label="永久链接：OCI Hooks 设置" href="#oci-hooks-settings"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">请参阅</font></font><a href="https://bottlerocket.dev/en/os/latest/#/api/settings/oci-hooks/" rel="nofollow"><code>settings.oci-hooks.*</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">参考资料</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">OCI 默认设置</font></font></h4><a id="user-content-oci-defaults-settings" class="anchor" aria-label="永久链接：OCI 默认设置" href="#oci-defaults-settings"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">请参阅</font></font><a href="https://bottlerocket.dev/en/os/latest/#/api/settings/oci-defaults/" rel="nofollow"><code>settings.oci-defaults.*</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">参考资料</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h5 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">OCI 默认值：功能</font></font></h5><a id="user-content-oci-defaults-capabilities" class="anchor" aria-label="永久链接：OCI 默认值：功能" href="#oci-defaults-capabilities"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">请参阅</font><a href="https://bottlerocket.dev/en/os/latest/#/api/settings/oci-defaults/" rel="nofollow"><font style="vertical-align: inherit;">参考</font></a></font><a href="https://bottlerocket.dev/en/os/latest/#/api/settings/oci-defaults/" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">中的“功能设置”部分</font></font><code>settings.oci-defaults.*</code><font style="vertical-align: inherit;"></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h5 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">OCI 默认值：资源限制</font></font></h5><a id="user-content-oci-defaults-resource-limits" class="anchor" aria-label="永久链接：OCI 默认值：资源限制" href="#oci-defaults-resource-limits"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">请参阅</font><a href="https://bottlerocket.dev/en/os/latest/#/api/settings/oci-defaults/" rel="nofollow"><font style="vertical-align: inherit;">参考</font></a></font><a href="https://bottlerocket.dev/en/os/latest/#/api/settings/oci-defaults/" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">中的“资源限制设置”部分</font></font><code>settings.oci-defaults.*</code><font style="vertical-align: inherit;"></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">容器镜像注册表设置</font></font></h4><a id="user-content-container-image-registry-settings" class="anchor" aria-label="永久链接：容器镜像注册表设置" href="#container-image-registry-settings"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">请参阅</font></font><a href="https://bottlerocket.dev/en/os/latest/#/api/settings/container-registry/" rel="nofollow"><code>settings.container-registry.*</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">参考资料</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">容器运行时设置</font></font></h4><a id="user-content-container-runtime-settings" class="anchor" aria-label="永久链接：容器运行时设置" href="#container-runtime-settings"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">请参阅</font></font><a href="https://bottlerocket.dev/en/os/latest/#/api/settings/container-runtime/" rel="nofollow"><code>settings.container-runtime.*</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">参考资料</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">更新设置</font></font></h4><a id="user-content-updates-settings" class="anchor" aria-label="永久链接：更新设置" href="#updates-settings"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">请参阅</font></font><a href="https://bottlerocket.dev/en/os/latest/#/api/settings/updates/" rel="nofollow"><code>settings.updates.*</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">参考资料</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">网络设置</font></font></h4><a id="user-content-network-settings" class="anchor" aria-label="永久链接：网络设置" href="#network-settings"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">请参阅</font></font><a href="https://bottlerocket.dev/en/os/latest/#/api/settings/network/" rel="nofollow"><code>settings.network.*</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">参考资料</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h5 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">代理设置</font></font></h5><a id="user-content-proxy-settings" class="anchor" aria-label="永久链接：代理设置" href="#proxy-settings"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">请参阅</font><a href="https://bottlerocket.dev/en/os/latest/#/api/settings/network/" rel="nofollow"><font style="vertical-align: inherit;">参考</font></a></font><a href="https://bottlerocket.dev/en/os/latest/#/api/settings/network/" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">中的“代理设置”部分</font></font><code>settings.networks.*</code><font style="vertical-align: inherit;"></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">指标设置</font></font></h4><a id="user-content-metrics-settings" class="anchor" aria-label="永久链接：指标设置" href="#metrics-settings"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">请参阅</font></font><a href="https://bottlerocket.dev/en/os/latest/#/api/settings/metrics/" rel="nofollow"><code>settings.metrics.*</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">参考资料</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">时间设置</font></font></h4><a id="user-content-time-settings" class="anchor" aria-label="固定链接：时间设置" href="#time-settings"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">请参阅</font></font><a href="https://bottlerocket.dev/en/os/latest/#/api/settings/ntp/" rel="nofollow"><code>settings.ntp.*</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">参考资料</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">内核设置</font></font></h4><a id="user-content-kernel-settings" class="anchor" aria-label="永久链接：内核设置" href="#kernel-settings"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">请参阅</font></font><a href="https://bottlerocket.dev/en/os/latest/#/api/settings/kernel/" rel="nofollow"><code>settings.kernel.*</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">参考资料</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">启动相关设置</font></font></h4><a id="user-content-boot-related-settings" class="anchor" aria-label="永久链接：启动相关设置" href="#boot-related-settings"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">请参阅</font></font><a href="https://bottlerocket.dev/en/os/latest/#/api/settings/boot/" rel="nofollow"><code>settings.boot.*</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">参考资料</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">自定义 CA 证书设置</font></font></h4><a id="user-content-custom-ca-certificates-settings" class="anchor" aria-label="永久链接：自定义 CA 证书设置" href="#custom-ca-certificates-settings"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">请参阅</font></font><a href="https://bottlerocket.dev/en/os/latest/#/api/settings/pki/" rel="nofollow"><code>settings.pki.*</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">参考资料</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">主机容器设置</font></font></h4><a id="user-content-host-containers-settings" class="anchor" aria-label="永久链接：主机容器设置" href="#host-containers-settings"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">请参阅</font></font><a href="https://bottlerocket.dev/en/os/latest/#/api/settings/host-containers/" rel="nofollow"><code>settings.host-containers.*</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">参考资料</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h5 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">自定义主机容器</font></font></h5><a id="user-content-custom-host-containers" class="anchor" aria-label="永久链接：自定义主机容器" href="#custom-host-containers"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">请参阅</font></font><a href="https://bottlerocket.dev/en/os/latest/#/concepts/host-containers/" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">主机容器文档</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Bootstrap 容器设置</font></font></h4><a id="user-content-bootstrap-containers-settings" class="anchor" aria-label="永久链接：Bootstrap 容器设置" href="#bootstrap-containers-settings"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">请参阅</font></font><a href="https://bottlerocket.dev/en/os/latest/#/api/settings/bootstrap-containers/" rel="nofollow"><code>settings.bootstrap-containers.*</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">参考资料</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">以及</font></font><a href="https://bottlerocket.dev/en/os/latest/#/concepts/bootstrap-containers/" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Bootstrap 容器文档</font></font></a></p>
+<div class="markdown-heading" dir="auto"><h5 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">在引导程序和超级容器中安装传播</font></font></h5><a id="user-content-mount-propagations-in-bootstrap-and-superpowered-containers" class="anchor" aria-label="永久链接：在引导程序和超级容器中安装传播" href="#mount-propagations-in-bootstrap-and-superpowered-containers"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">引导程序和超级主机容器都配置了</font></font><code>/.bottlerocket/rootfs/mnt</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">指向</font></font><code>/mnt</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">主机中的绑定挂载，而主机本身是的绑定挂载</font></font><code>/local/mnt</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。此绑定挂载设置了共享传播，因此</font></font><code>/.bottlerocket/rootfs/mnt</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">在任何引导程序或超级主机容器下创建的任何新挂载点都将跨挂载命名空间传播。您可以使用此功能配置连接到主机的临时磁盘，您可能希望在工作负载上使用它们。</font></font></p>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">平台特定设置</font></font></h4><a id="user-content-platform-specific-settings" class="anchor" aria-label="永久链接：平台特定设置" href="#platform-specific-settings"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"></font><a href="https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/sources/early-boot-config/early-boot-config"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">平台特定设置由early-boot-config</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">根据运行平台上可用的元数据在启动时自动设置。</font></font><a href="#interacting-with-settings"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">可以像其他设置一样，</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">出于测试目的覆盖这些设置</font><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h5 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">AWS 特定设置</font></font></h5><a id="user-content-aws-specific-settings" class="anchor" aria-label="永久链接：AWS 特定设置" href="#aws-specific-settings"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">请参阅</font></font><a href="https://bottlerocket.dev/en/os/latest/#/api/settings/aws/" rel="nofollow"><code>settings.aws.*</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">参考资料</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h3 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">日志</font></font></h3><a id="user-content-logs" class="anchor" aria-label="永久链接：日志" href="#logs"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">您可以</font></font><code>logdog</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">通过</font></font><a href="#admin-container"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">管理容器</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">从 Bottlerocket 主机获取日志文件存档。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">有关收集内容的列表，请参阅 logdog</font></font><a href="https://github.com/bottlerocket-os/bottlerocket-core-kit/blob/develop/sources/logdog/src/log_request.rs"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">命令列表</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">生成日志</font></font></h4><a id="user-content-generating-logs" class="anchor" aria-label="永久链接：生成日志" href="#generating-logs"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">通过 SSH 连接到 Bottlerocket 主机或</font></font><code>apiclient exec admin bash</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">访问管理容器，然后运行：</font></font></p>
+<div class="highlight highlight-source-shell notranslate position-relative overflow-auto" dir="auto"><pre>sudo sheltie
+logdog</pre><div class="zeroclipboard-container">
+    <clipboard-copy aria-label="Copy" class="ClipboardButton btn btn-invisible js-clipboard-copy m-2 p-0 tooltipped-no-delay d-flex flex-justify-center flex-items-center" data-copy-feedback="Copied!" data-tooltip-direction="w" value="sudo sheltie
+logdog" tabindex="0" role="button">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-copy js-clipboard-copy-icon">
+    <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+</svg>
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check js-clipboard-check-icon color-fg-success d-none">
+    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+</svg>
+    </clipboard-copy>
+  </div></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">这会将日志存档写入</font></font><code>/var/log/support/bottlerocket-logs.tar.gz</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。可从 处的主机容器访问此存档</font></font><code>/.bottlerocket/support</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h4 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">获取日志</font></font></h4><a id="user-content-fetching-logs" class="anchor" aria-label="永久链接：获取日志" href="#fetching-logs"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">有多种方法可以检索生成的日志档案。</font></font></p>
+<ul dir="auto">
+<li>
+<p dir="auto"><strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如果已启用，则通过 SSH</font></font></strong></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">退出 Bottlerocket 主机后，运行以下命令：</font></font></p>
+<div class="highlight highlight-source-shell notranslate position-relative overflow-auto" dir="auto"><pre>ssh -i YOUR_KEY_FILE \
+ec2-user@YOUR_HOST \
+<span class="pl-s"><span class="pl-pds">"</span>cat /.bottlerocket/support/bottlerocket-logs.tar.gz<span class="pl-pds">"</span></span> <span class="pl-k">&gt;</span> bottlerocket-logs.tar.gz</pre><div class="zeroclipboard-container">
+    <clipboard-copy aria-label="Copy" class="ClipboardButton btn btn-invisible js-clipboard-copy m-2 p-0 tooltipped-no-delay d-flex flex-justify-center flex-items-center" data-copy-feedback="Copied!" data-tooltip-direction="w" value="ssh -i YOUR_KEY_FILE \
+ec2-user@YOUR_HOST \
+&quot;cat /.bottlerocket/support/bottlerocket-logs.tar.gz&quot; > bottlerocket-logs.tar.gz" tabindex="0" role="button">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-copy js-clipboard-copy-icon">
+    <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+</svg>
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check js-clipboard-check-icon color-fg-success d-none">
+    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+</svg>
+    </clipboard-copy>
+  </div></div>
+</li>
+<li>
+<p dir="auto"><strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如果</font></font><code>kubectl get</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">运行 Kubernetes</font></font></strong></p>
+<div class="highlight highlight-source-shell notranslate position-relative overflow-auto" dir="auto"><pre>kubectl get --raw \
+<span class="pl-s"><span class="pl-pds">"</span>/api/v1/nodes/NODE_NAME/proxy/logs/support/bottlerocket-logs.tar.gz<span class="pl-pds">"</span></span> <span class="pl-k">&gt;</span> bottlerocket-logs.tar.gz</pre><div class="zeroclipboard-container">
+    <clipboard-copy aria-label="Copy" class="ClipboardButton btn btn-invisible js-clipboard-copy m-2 p-0 tooltipped-no-delay d-flex flex-justify-center flex-items-center" data-copy-feedback="Copied!" data-tooltip-direction="w" value="kubectl get --raw \
+&quot;/api/v1/nodes/NODE_NAME/proxy/logs/support/bottlerocket-logs.tar.gz&quot; > bottlerocket-logs.tar.gz" tabindex="0" role="button">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-copy js-clipboard-copy-icon">
+    <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+</svg>
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-check js-clipboard-check-icon color-fg-success d-none">
+    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+</svg>
+    </clipboard-copy>
+  </div></div>
+</li>
+<li>
+<p dir="auto"><strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如果您的实例无法通过 SSH 或 Kubernetes 访问，则</font><font style="vertical-align: inherit;">使用</font></font><a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-getting-started-enable-ssh-connections.html" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">SSH over SSM</font></font></a><font style="vertical-align: inherit;"></font></strong></p>
+</li>
+</ul>
+<div class="markdown-heading" dir="auto"><h3 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Kdump 支持</font></font></h3><a id="user-content-kdump-support" class="anchor" aria-label="永久链接：Kdump 支持" href="#kdump-support"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Bottlerocket 支持在系统内核崩溃时收集内核崩溃转储。一旦发生这种情况，dmesg 日志和 vmcore 转储都会存储在 中</font></font><code>/var/log/kdump</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">，并且系统会重新启动。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">关于提供的 kdump 支持，有几个重要的注意事项：</font></font></p>
+<ul dir="auto">
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">目前，只有 vmware 变体启用了 kdump 支持</font></font></li>
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">仅当主机至少有 2GB 内存时，系统内核才会为崩溃内核保留 256MB；保留的空间将无法供主机中正在运行的进程使用</font></font></li>
+<li><font style="vertical-align: inherit;"></font><code>crashkernel</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">仅当内核的命令行中存在该参数并且为其保留了内存</font><font style="vertical-align: inherit;">时，才会加载崩溃内核</font></font></li>
+</ul>
+<div class="markdown-heading" dir="auto"><h3 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">NVIDIA GPU 支持</font></font></h3><a id="user-content-nvidia-gpus-support" class="anchor" aria-label="永久链接：NVIDIA GPU 支持" href="#nvidia-gpus-support"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Bottlerocket 的</font></font><code>nvidia</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">变体包括利用 NVIDIA GPU 所需的软件包和配置。目前，Bottlerocket 支持以下 NVIDIA 驱动程序版本：</font></font></p>
+<ul dir="auto">
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">470.X</font></font></li>
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">515.X</font></font></li>
+</ul>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">这些变体的官方 AMI 可与配备 EC2 GPU 的实例类型一起使用，</font><font style="vertical-align: inherit;">例如：</font></font><code>p2</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">、、、、</font><font style="vertical-align: inherit;">和。请注意</font><font style="vertical-align: inherit;">，</font><font style="vertical-align: inherit;">NVIDIA 驱动程序及更高版本不支持较旧的实例</font><font style="vertical-align: inherit;">类型</font><font style="vertical-align: inherit;">，例如。</font><font style="vertical-align: inherit;">您</font><font style="vertical-align: inherit;">需要确保根据计划使用的实例类型选择适当的 AMI。有关</font><font style="vertical-align: inherit;">Kubernetes 变体的更多详细信息，请参阅</font><a href="/bottlerocket-os/bottlerocket/blob/develop/QUICKSTART-EKS.md#aws-k8s--nvidia-variants"><font style="vertical-align: inherit;">QUICKSTART-EKS ，有关 ECS 变体的详细信息，请参阅</font></a><a href="/bottlerocket-os/bottlerocket/blob/develop/QUICKSTART-ECS.md#aws-ecs--nvidia-variants"><font style="vertical-align: inherit;">QUICKSTART-ECS</font></a><font style="vertical-align: inherit;">。</font></font><code>p3</code><font style="vertical-align: inherit;"></font><code>p4</code><font style="vertical-align: inherit;"></font><code>g3</code><font style="vertical-align: inherit;"></font><code>g4dn</code><font style="vertical-align: inherit;"></font><code>g5</code><font style="vertical-align: inherit;"></font><code>g5g</code><font style="vertical-align: inherit;"></font><code>p2</code><font style="vertical-align: inherit;"></font><code>515.X</code><font style="vertical-align: inherit;"></font><a href="/bottlerocket-os/bottlerocket/blob/develop/QUICKSTART-EKS.md#aws-k8s--nvidia-variants"><font style="vertical-align: inherit;"></font></a><font style="vertical-align: inherit;"></font><a href="/bottlerocket-os/bottlerocket/blob/develop/QUICKSTART-ECS.md#aws-ecs--nvidia-variants"><font style="vertical-align: inherit;"></font></a><font style="vertical-align: inherit;"></font></p>
+<div class="markdown-heading" dir="auto"><h2 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">细节</font></font></h2><a id="user-content-details" class="anchor" aria-label="固定链接：详细信息" href="#details"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<div class="markdown-heading" dir="auto"><h3 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">安全</font></font></h3><a id="user-content-security" class="anchor" aria-label="固定链接：安全" href="#security"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">🛡️🦀</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">要了解有关 Bottlerocket 中安全功能的更多信息，请参阅</font></font><a href="/bottlerocket-os/bottlerocket/blob/develop/SECURITY_FEATURES.md"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">安全功能</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。它描述了我们如何使用</font></font><a href="https://gitlab.com/cryptsetup/cryptsetup/wikis/DMVerity" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">dm-verity</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">和</font></font><a href="https://selinuxproject.org/" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">SELinux</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">等功能来保护系统免受安全威胁。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">要了解有关 Bottlerocket 安全建议的更多信息，请参阅</font></font><a href="/bottlerocket-os/bottlerocket/blob/develop/SECURITY_GUIDANCE.md"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">安全指南</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。它记录了您可以采取的其他步骤来保护操作系统，并包含</font></font><a href="https://kubernetes.io/docs/concepts/policy/pod-security-policy/" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Pod 安全策略</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">等资源供您参考。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">此外，几乎所有第一方组件都是用</font></font><a href="https://www.rust-lang.org/" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Rust</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">编写的。Rust 消除了一些类型的内存安全问题，并鼓励有助于安全的设计模式。</font></font></p>
+<div class="markdown-heading" dir="auto"><h3 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">包装</font></font></h3><a id="user-content-packaging" class="anchor" aria-label="固定链接：包装" href="#packaging"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Bottlerocket 是使用容器工具链从源代码构建的。我们使用 RPM 包定义来构建单个包并将其安装到镜像中。RPM 本身并不在镜像中 - 它只是一种常见且方便的包定义格式。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">我们目前打包了以下主要的第三方组件：</font></font></p>
+<ul dir="auto">
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Linux 内核（</font></font><a href="https://en.wikipedia.org/wiki/Linux" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">背景</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">、</font></font><a href="https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/packages/kernel-5.10/"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">5.10 打包</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">、</font></font><a href="https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/packages/kernel-5.15/"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">5.15 打包</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">）</font></font></li>
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">glibc（</font></font><a href="https://www.gnu.org/software/libc/" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">背景</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">、</font></font><a href="https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/packages/glibc/"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">包装</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">）</font></font></li>
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Buildroot 作为构建工具链（</font></font><a href="https://buildroot.org/" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">后台</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">，通过</font></font><a href="https://github.com/bottlerocket-os/bottlerocket-sdk"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">SDK</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">）</font></font></li>
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">GRUB，带有分区翻转更新补丁（</font></font><a href="https://www.gnu.org/software/grub/" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">背景</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">、</font></font><a href="https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/packages/grub/"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">包装</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">）</font></font></li>
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">systemd 作为 init (</font></font><a href="https://en.wikipedia.org/wiki/Systemd" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">后台</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">，</font></font><a href="https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/packages/systemd/"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">打包</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">)</font></font></li>
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">用于网络的 wicked（</font></font><a href="https://github.com/openSUSE/wicked"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">背景</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">、</font></font><a href="https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/packages/wicked/"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">打包</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">）</font></font></li>
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">containerd（</font></font><a href="https://containerd.io/" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">背景</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">、</font></font><a href="https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/packages/containerd/"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">包装</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">）</font></font></li>
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Kubernetes（</font></font><a href="https://kubernetes.io/" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">背景</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">、</font></font><a href="https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/packages/kubernetes-1.30/"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">打包</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">）</font></font></li>
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">aws-iam-authenticator（</font></font><a href="https://github.com/kubernetes-sigs/aws-iam-authenticator"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">背景</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">，</font></font><a href="https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/packages/aws-iam-authenticator/"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">包装</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">）</font></font></li>
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Amazon ECS 代理（</font></font><a href="https://github.com/aws/amazon-ecs-agent"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">后台</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">、</font></font><a href="https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/packages/ecs-agent/"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">打包</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">）</font></font></li>
+</ul>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">如需进一步的文档或查看其余的软件包，请参阅</font></font><a href="https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/packages/"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">包装目录</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h3 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">更新</font></font></h3><a id="user-content-updates-1" class="anchor" aria-label="固定链接：更新" href="#updates-1"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Bottlerocket 镜像有两组相同的分区，A 和 B。更新 Bottlerocket 时，分区表会更新为从 A 组指向 B 组，反之亦然。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">我们还跟踪成功的启动，如果出现失败，它将自动恢复到之前的工作分区集。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">更新过程使用受</font></font><a href="https://theupdateframework.github.io/" rel="nofollow"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">TUF</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">保护的图像。有关更多详细信息，请参阅</font></font><a href="https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/sources/updater"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">更新系统文档</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h3 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">API</font></font></h3><a id="user-content-api" class="anchor" aria-label="固定链接：API" href="#api"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">您可以通过两种主要方式与生产 Bottlerocket 实例进行交互。（上面还有几种用于测试实例的</font></font><a href="#exploration"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">探索</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">方法。）</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">第一种方法是通过容器编排器，用于运行或管理容器。这使用编排器的标准渠道，例如</font></font><code>kubectl</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Kubernetes 之类的工具。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">第二种方法是通过 Bottlerocket API，例如当您想要配置系统时。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">有一个 HTTP API 服务器监听本地 Unix 域套接字。远程访问 API 需要经过身份验证的传输，例如 SSM 的 RunCommand 或 Session Manager，如上所述。有关更多详细信息，请参阅 apiserver</font></font><a href="https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/sources/api/apiserver/"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">文档</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">apiclient</font><font style="vertical-align: inherit;">可用于发出请求。它们只是 HTTP 请求，但 API 客户端使用 Unix 域套接字简化了发出请求的过程</font></font><a href="https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/sources/api/apiclient/"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></a><font style="vertical-align: inherit;"></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">为了简化配置，我们提供了</font></font><a href="https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/sources/early-boot-config/early-boot-config"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">early-boot-config</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">，它可以根据实例用户数据为您发送 API 请求。如果您启动虚拟机（例如 EC2 实例），它将从用户数据中读取 TOML 格式的 Bottlerocket 配置并将其发送到 API 服务器。这样，您就可以配置 Bottlerocket 实例，而无需在启动后进行 API 调用。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">请参阅上面的</font></font><a href="#settings"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">设置</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">以获取示例并了解您可以配置的内容。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"></font><a href="https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/sources/api/apiclient#exec-mode"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">您还可以使用apiclient exec</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">通过 API 访问主机容器</font><font style="vertical-align: inherit;">。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">服务器和客户端是 API 系统面向用户的组件，但还有许多其他组件可以协同工作，以确保您的设置得到应用，并且能够在 Bottlerocket 升级后继续使用。</font></font></p>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">有关更多详细信息，请参阅</font></font><a href="https://github.com/bottlerocket-os/bottlerocket-core-kit/tree/develop/sources/api"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">API 系统文档</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+<div class="markdown-heading" dir="auto"><h3 tabindex="-1" class="heading-element" dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">默认卷</font></font></h3><a id="user-content-default-volumes" class="anchor" aria-label="永久链接：默认卷" href="#default-volumes"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path></svg></a></div>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Bottlerocket 使用两个默认存储卷进行运行。</font></font></p>
+<ul dir="auto">
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">根设备保存主动和被动</font></font><a href="#updates-1"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">分区集。它还包含引导加载程序、用于验证</font></font></a><font style="vertical-align: inherit;"></font><a href="/bottlerocket-os/bottlerocket/blob/develop/SECURITY_FEATURES.md#immutable-rootfs-backed-by-dm-verity"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">不可变根文件系统</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">的 dm-verity 哈希树</font><font style="vertical-align: inherit;">以及 Bottlerocket API 的数据存储。</font></font></li>
+<li><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">数据设备用作容器镜像、容器编排、</font></font><a href="#Custom-host-containers"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">主机容器</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">和</font></font><a href="#Bootstrap-containers-settings"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">引导容器</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">的持久存储。操作系统通常不会在定期更新期间更改此卷，但对上游软件（如 containerd 或 kubelet）的更改可能会导致其存储的数据发生变化。此设备（安装在</font></font><code>/local</code><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">主机上）可用于编排工作负载的应用程序存储；但是，我们建议在这种情况下尽可能使用额外的卷。</font><font style="vertical-align: inherit;">有关更多信息，请参阅</font></font><a href="/bottlerocket-os/bottlerocket/blob/develop/SECURITY_GUIDANCE.md#limit-access-to-system-mounts"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">安全指南文档的此部分。</font></font></a><font style="vertical-align: inherit;"></font></li>
+</ul>
+<p dir="auto"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">在启动时，Bottlerocket 将增加数据分区大小以使用所有数据设备。如果增加设备的大小，您可以重新启动 Bottlerocket 以扩展数据分区。如果您需要在不重新启动的情况下扩展数据分区，请查看此</font></font><a href="https://github.com/bottlerocket-os/bottlerocket/discussions/2011" data-hovercard-type="discussion" data-hovercard-url="/bottlerocket-os/bottlerocket/discussions/2011/hovercard"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">讨论</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">。</font></font></p>
+</article></div>
